@@ -1,5 +1,6 @@
 import os
 import logging
+import json
 from flask import Flask, render_template, request
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -13,20 +14,27 @@ logging.basicConfig(level=logging.DEBUG)
 service = None
 creds = None
 
-# Path to your service account JSON file
-SERVICE_ACCOUNT_FILE = '/Users/tijanamatias/Desktop/google-docs-update-app/credentials.json'
+# Define the required scopes for your app (Google Sheets read and write access)
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-SPREADSHEET_ID = '1dZ-iYwWfQjAsTFknw9nhI8nocV7fAdzE8NbSiSzRyy0'
+SPREADSHEET_ID = '1dZ-iYwWfQjAsTFknw9nhI8nocV7fAdzE8NbSiSzRyy0'  # Replace with your actual Spreadsheet ID
 
-# Initialize the Google Sheets service
-try:
-    creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-    service = build('sheets', 'v4', credentials=creds)
-    logging.info("Google Sheets service created successfully.")
-except Exception as e:
-    logging.error(f"Failed to create Google Sheets service: {e}")
-    service = None  # Set service to None if initialization fails
+# Load Google service account credentials from the environment variable
+SERVICE_ACCOUNT_INFO = os.getenv('GOOGLE_APPLICATION_CREDENTIALS_JSON')
 
+if SERVICE_ACCOUNT_INFO:
+    try:
+        creds = service_account.Credentials.from_service_account_info(
+            json.loads(SERVICE_ACCOUNT_INFO), scopes=SCOPES)
+        service = build('sheets', 'v4', credentials=creds)
+        logging.info("Google Sheets service created successfully.")
+    except Exception as e:
+        logging.error(f"Failed to create Google Sheets service: {e}")
+        service = None  # Set service to None if initialization fails
+else:
+    logging.error("Google Sheets credentials not found in environment variables.")
+    service = None
+
+# Function to find the first empty row in the Google Sheet
 def find_first_empty_row():
     if service is None:
         logging.error("Google Sheets service is not initialized.")
@@ -48,6 +56,7 @@ def find_first_empty_row():
         logging.error(f"Error finding first empty row: {e}")
         raise
 
+# Route for the form to input order data
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -80,6 +89,7 @@ def index():
 
     return render_template('index.html')
 
+# Run the Flask app
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))  # Get port from environment variable
     app.run(host='0.0.0.0', port=port, debug=True)  # Bind to all available IP addresses

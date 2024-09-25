@@ -9,20 +9,29 @@ app = Flask(__name__)
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
+# Global variables for Google Sheets service and credentials
+service = None
+creds = None
+
 # Path to your service account JSON file
 SERVICE_ACCOUNT_FILE = '/Users/tijanamatias/Desktop/google-docs-update-app/credentials.json'
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 SPREADSHEET_ID = '1dZ-iYwWfQjAsTFknw9nhI8nocV7fAdzE8NbSiSzRyy0'
 
-# Create credentials from the service account file
+# Initialize the Google Sheets service
 try:
     creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
     service = build('sheets', 'v4', credentials=creds)
     logging.info("Google Sheets service created successfully.")
 except Exception as e:
     logging.error(f"Failed to create Google Sheets service: {e}")
+    service = None  # Set service to None if initialization fails
 
 def find_first_empty_row():
+    if service is None:
+        logging.error("Google Sheets service is not initialized.")
+        raise Exception("Google Sheets service is not initialized.")
+
     try:
         # Get the current values in column A
         result = service.spreadsheets().values().get(
@@ -37,7 +46,7 @@ def find_first_empty_row():
         return len(values) + 1
     except Exception as e:
         logging.error(f"Error finding first empty row: {e}")
-        return 1  # Default to first row on error
+        raise
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -45,14 +54,19 @@ def index():
         order_number = request.form['order_number']
         sku = request.form['sku']
 
+        # Ensure the Google Sheets service is available
+        if service is None:
+            logging.error("Google Sheets service is not available.")
+            return "An error occurred: Google Sheets service is not available."
+
         # Prepare the data to be updated
         values = [[order_number, sku]]
-        first_empty_row = find_first_empty_row()
-        range_to_update = f'WH to CS OOS Comms!A{first_empty_row}:B{first_empty_row}'
-
-        # Call the Sheets API to update the spreadsheet
-        body = {'values': values}
         try:
+            first_empty_row = find_first_empty_row()
+            range_to_update = f'WH to CS OOS Comms!A{first_empty_row}:B{first_empty_row}'
+
+            # Call the Sheets API to update the spreadsheet
+            body = {'values': values}
             service.spreadsheets().values().update(
                 spreadsheetId=SPREADSHEET_ID,
                 range=range_to_update,

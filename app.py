@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request
 import google.auth
 from googleapiclient.discovery import build
-
+import os
 app = Flask(__name__)
 
 # Add your Google Sheets API credentials here
@@ -37,4 +37,5 @@ def index():
     return render_template('index.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Run the app on the specified host and port
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))

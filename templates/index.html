@@ -17,7 +17,6 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            transition: background-color 0.5s ease;
         }
         h1 {
             margin-bottom: 20px;
@@ -31,10 +30,6 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             width: 300px;
             text-align: center;
-            transition: transform 0.3s ease;
-        }
-        .form-container:hover {
-            /* Removed movement on hover */
         }
         input[type="text"] {
             width: calc(100% - 20px);
@@ -42,12 +37,6 @@
             margin: 10px 0;
             border: 1px solid #000000;
             border-radius: 5px;
-            transition: border-color 0.3s ease;
-        }
-        input[type="text"]:focus {
-            border-color: #000000;
-            outline: none;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
         }
         button {
             background-color: #000000;
@@ -56,51 +45,28 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
         }
         button:hover {
             background-color: #444444;
-            transform: translateY(-2px);
-        }
-        .logo {
-            width: 100px;
-            margin-bottom: 20px;
-            animation: logoAnimation 1s ease-in-out infinite; /* Added animation */
-        }
-        @keyframes logoAnimation {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
         }
         .success-message {
             color: green; /* Success message color */
             margin-top: 10px;
-            display: none; /* Hidden by default */
+            display: {{ 'block' if success_message else 'none' }};
         }
     </style>
 </head>
 <body>
-    <img src="{{ url_for('static', filename='RW_Flame.jpg') }}" alt="Logo" class="logo">
     <div class="form-container">
-        <h1>Enter OOS details</h1> <!-- Updated title -->
+        <h1>Enter OOS details</h1>
         <form method="POST">
             <input type="text" name="order_number" placeholder="Order Number" required>
             <input type="text" name="sku" placeholder="SKU" required>
             <button type="submit">Submit</button>
         </form>
-        <p class="success-message">OOS successfully added to Google Sheet</p> <!-- Success message -->
+        {% if success_message %}
+            <p class="success-message">{{ success_message }}</p>
+        {% endif %}
     </div>
-    
-    <script>
-        // Show success message on form submission
-        document.querySelector('form').addEventListener('submit', function(e) {
-            e.preventDefault(); // Prevent default form submission
-            
-            // Simulate a successful submission (you can replace this with your actual submission logic)
-            setTimeout(() => {
-                document.querySelector('.success-message').style.display = 'block';
-            }, 100); // Delay to simulate processing
-        });
-    </script>
 </body>
 </html>

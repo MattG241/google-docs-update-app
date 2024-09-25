@@ -78,15 +78,20 @@ def index():
             first_empty_row = find_first_empty_row()
             range_to_update = f'WH to CS OOS Comms!A{first_empty_row}:B{first_empty_row}'
 
-            # Call the Sheets API to update the spreadsheet
+            # Log the range and body before execution
+            logging.debug(f"Range to update: {range_to_update}")
             body = {'values': values}
-            service.spreadsheets().values().update(
+            logging.debug(f"Body to update: {body}")
+
+            # Call the Sheets API to update the spreadsheet
+            response = service.spreadsheets().values().update(
                 spreadsheetId=SPREADSHEET_ID,
                 range=range_to_update,
                 valueInputOption='RAW',
                 body=body
             ).execute()
-            logging.info("Data updated successfully in Google Sheet.")
+
+            logging.info(f"Response from Google Sheets API: {response}")
             success_message = "OOS successfully added to Google Sheet."  # Set success message
         except Exception as e:
             logging.error(f"Error updating spreadsheet: {e}")

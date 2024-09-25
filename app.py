@@ -1,7 +1,7 @@
 import os
 import logging
 import json
-from flask import Flask, render_template, request, jsonify  # Import jsonify for JSON responses
+from flask import Flask, render_template, request
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
@@ -59,6 +59,8 @@ def find_first_empty_row():
 # Route for the form to input order data
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    success_message = None  # Initialize success message
+
     if request.method == 'POST':
         order_number = request.form['order_number']
         sku = request.form['sku']
@@ -66,10 +68,12 @@ def index():
         # Ensure the Google Sheets service is available
         if service is None:
             logging.error("Google Sheets service is not available.")
-            return jsonify({'success': False, 'message': "An error occurred: Google Sheets service is not available."})
+            return "An error occurred: Google Sheets service is not available."
 
         # Prepare the data to be updated
         values = [[order_number, sku]]
+        logging.debug(f"Updating Google Sheet with values: {values}")
+
         try:
             first_empty_row = find_first_empty_row()
             range_to_update = f'WH to CS OOS Comms!A{first_empty_row}:B{first_empty_row}'
@@ -82,12 +86,13 @@ def index():
                 valueInputOption='RAW',
                 body=body
             ).execute()
-            return jsonify({'success': True, 'message': 'OOS successfully added to Google Sheet!'})  # Return JSON response
+            logging.info("Data updated successfully in Google Sheet.")
+            success_message = "OOS successfully added to Google Sheet."  # Set success message
         except Exception as e:
             logging.error(f"Error updating spreadsheet: {e}")
-            return jsonify({'success': False, 'message': f'An error occurred: {e}'})  # Return error message in JSON format
+            return f'An error occurred: {e}'
 
-    return render_template('index.html')
+    return render_template('index.html', success_message=success_message)
 
 # Run the Flask app
 if __name__ == '__main__':

@@ -1,0 +1,40 @@
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+
+# Set up authentication
+SCOPES = ['https://www.googleapis.com/auth/documents']
+SERVICE_ACCOUNT_FILE = 'path/to/your/credentials.json'  # Replace with the actual path to your JSON file
+
+# Authenticate and create the Google Docs service
+credentials = service_account.Credentials.from_service_account_file(
+    SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+
+service = build('docs', 'v1', credentials=credentials)
+from datetime import datetime
+
+def update_google_doc(document_id, order_number, sku):
+    # Get current date
+    current_date = datetime.now().strftime("%Y-%m-%d")
+
+    # Prepare requests to insert data into the document
+    requests = [
+        {
+            'insertText': {
+                'location': {
+                    'index': 1,  # Adjust this index if needed
+                },
+                'text': f"Date: {current_date}, Order Number: {order_number}, SKU: {sku}\n"
+            }
+        },
+    ]
+
+    # Execute batch update to the document
+    service.documents().batchUpdate(documentId=document_id, body={'requests': requests}).execute()
+    print("Document updated successfully!")
+if __name__ == '__main__':
+    document_id = 'your-document-id'  # Replace with your actual document ID
+    order_number = input("Enter the order number: ")
+    sku = input("Enter the SKU: ")
+
+    update_google_doc(document_id, order_number, sku)
+

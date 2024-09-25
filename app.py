@@ -1,7 +1,7 @@
 import os
 import logging
 import json
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify  # Import jsonify for JSON responses
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
@@ -66,7 +66,7 @@ def index():
         # Ensure the Google Sheets service is available
         if service is None:
             logging.error("Google Sheets service is not available.")
-            return "An error occurred: Google Sheets service is not available."
+            return jsonify({'success': False, 'message': "An error occurred: Google Sheets service is not available."})
 
         # Prepare the data to be updated
         values = [[order_number, sku]]
@@ -82,10 +82,10 @@ def index():
                 valueInputOption='RAW',
                 body=body
             ).execute()
-            return 'Data updated successfully!'
+            return jsonify({'success': True, 'message': 'OOS successfully added to Google Sheet!'})  # Return JSON response
         except Exception as e:
             logging.error(f"Error updating spreadsheet: {e}")
-            return f'An error occurred: {e}'
+            return jsonify({'success': False, 'message': f'An error occurred: {e}'})  # Return error message in JSON format
 
     return render_template('index.html')
 

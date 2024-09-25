@@ -4,6 +4,7 @@ import json
 from flask import Flask, render_template, request
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -70,13 +71,16 @@ def index():
             logging.error("Google Sheets service is not available.")
             return "An error occurred: Google Sheets service is not available."
 
+        # Get the current date in the desired format
+        current_date = datetime.now().strftime('%d/%m/%y')
+
         # Prepare the data to be updated
-        values = [[order_number, sku]]
+        values = [[current_date, order_number, sku]]  # Insert date, order number, and SKU
         logging.debug(f"Updating Google Sheet with values: {values}")
 
         try:
             first_empty_row = find_first_empty_row()
-            range_to_update = f'WH to CS OOS Comms!A{first_empty_row}:B{first_empty_row}'
+            range_to_update = f'WH to CS OOS Comms!A{first_empty_row}:C{first_empty_row}'  # Updated to C for SKU
 
             # Log the range and body before execution
             logging.debug(f"Range to update: {range_to_update}")

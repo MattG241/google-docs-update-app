@@ -3,7 +3,7 @@ from googleapiclient.discovery import build
 from datetime import datetime
 
 # Path to your service account JSON file
-SERVICE_ACCOUNT_FILE = '/Users/tijanamatias/Desktop/google-docs-update-app/autofilloos-e493bc91588b.json'
+SERVICE_ACCOUNT_FILE = '/Users/tijanamatias/Desktop/google-docs-update-app/credentials.json'
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
 # Create credentials from the service account file

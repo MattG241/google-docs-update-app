@@ -1,22 +1,17 @@
 from flask import Flask, render_template, request
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
+import os
+import logging
 
 app = Flask(__name__)
 
-@app.route('/')
-def home():
-    print("Home route accessed")
-    return render_template('index.html')
+# Set up logging
+logging.basicConfig(level=logging.INFO)
 
-@app.route('/test')
-def test():
-    return "This is a test route!"
-
-
-# Add your Google Sheets API credentials here
+# Google Sheets API configuration
 SPREADSHEET_ID = '1dZ-iYwWfQjAsTFknw9nhI8nocV7fAdzE8NbSiSzRyy0'
-CREDENTIALS_FILE = '/Users/tijanamatias/Desktop/google-docs-update-app/credentials.json'  # Path to your credentials file
+CREDENTIALS_FILE = os.environ.get('GOOGLE_CREDENTIALS_FILE')  # Path to your credentials file from environment variable
 
 def find_first_empty_row(service):
     range_name = 'WH to CS OOS Comms!A:A'  # Ensure this matches your sheet name
@@ -43,6 +38,7 @@ def index():
         service.spreadsheets().values().update(spreadsheetId=SPREADSHEET_ID, range=range_to_update,
                                                 valueInputOption='RAW', body=body).execute()
 
+        logging.info(f'Data updated: Order Number: {order_number}, SKU: {sku}')
         return 'Data updated successfully!'
 
     return render_template('index.html')

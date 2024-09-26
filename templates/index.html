@@ -18,7 +18,7 @@
             padding: 20px;
         }
         .container {
-            background-color: #f9f9f9; /* Light gray background for the form */
+            background-color: #ffffff; /* White background for the form */
             border-radius: 15px; /* Rounded corners */
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Subtle shadow */
             padding: 40px; /* Padding inside the container */
@@ -34,7 +34,17 @@
             margin-bottom: 30px; /* Space below the heading */
         }
         .form-group {
-            text-align: left; /* Align labels and inputs to the left */
+            position: relative;
+            margin-bottom: 20px; /* Space between form groups */
+        }
+        .form-control {
+            border: 2px solid black; /* Black border */
+            border-radius: 30px; /* Rounded input edges */
+            padding-left: 20px; /* Space for placeholder text */
+        }
+        .form-control::placeholder {
+            color: #aaa; /* Light placeholder text */
+            opacity: 1; /* Fully opaque */
         }
         .alert {
             margin-top: 20px;
@@ -42,9 +52,10 @@
         .btn-primary {
             background-color: #000000; /* Black button */
             border: none;
-            border-radius: 20px; /* Rounded button edges */
+            border-radius: 30px; /* Rounded button edges */
             padding: 10px 20px; /* Button padding */
             font-size: 16px; /* Button font size */
+            color: white; /* White button text */
         }
         .btn-primary:hover {
             background-color: #444444; /* Darker shade on hover */
@@ -68,12 +79,10 @@
         
         <form method="POST">
             <div class="form-group">
-                <label for="order_number">Order Number:</label>
-                <input type="text" class="form-control" id="order_number" name="order_number" required>
+                <input type="text" class="form-control" id="order_number" name="order_number" placeholder="Order Number" required>
             </div>
             <div class="form-group">
-                <label for="sku">SKU:</label>
-                <input type="text" class="form-control" id="sku" name="sku" required>
+                <input type="text" class="form-control" id="sku" name="sku" placeholder="SKU" required>
             </div>
             <button type="submit" class="btn btn-primary btn-block">Submit</button>
         </form>

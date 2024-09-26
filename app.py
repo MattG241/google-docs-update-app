@@ -1,109 +1,51 @@
-import os
-import logging
-import json
 from flask import Flask, render_template, request
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-from datetime import datetime
 
 app = Flask(__name__)
 
-# Configure logging
-logging.basicConfig(level=logging.DEBUG)
+@app.route('/')
+def home():
+    print("Home route accessed")
+    return render_template('index.html')
 
-# Global variables for Google Sheets service and credentials
-service = None
-creds = None
+@app.route('/test')
+def test():
+    return "This is a test route!"
 
-# Define the required scopes for your app (Google Sheets read and write access)
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-SPREADSHEET_ID = '1dZ-iYwWfQjAsTFknw9nhI8nocV7fAdzE8NbSiSzRyy0'  # Replace with your actual Spreadsheet ID
 
-# Load Google service account credentials from the environment variable
-SERVICE_ACCOUNT_INFO = os.getenv('GOOGLE_APPLICATION_CREDENTIALS_JSON')
+# Add your Google Sheets API credentials here
+SPREADSHEET_ID = '1dZ-iYwWfQjAsTFknw9nhI8nocV7fAdzE8NbSiSzRyy0'
+CREDENTIALS_FILE = '/Users/tijanamatias/Desktop/google-docs-update-app/credentials.json'  # Path to your credentials file
 
-if SERVICE_ACCOUNT_INFO:
-    try:
-        creds = service_account.Credentials.from_service_account_info(
-            json.loads(SERVICE_ACCOUNT_INFO), scopes=SCOPES)
-        service = build('sheets', 'v4', credentials=creds)
-        logging.info("Google Sheets service created successfully.")
-    except Exception as e:
-        logging.error(f"Failed to create Google Sheets service: {e}")
-        service = None  # Set service to None if initialization fails
-else:
-    logging.error("Google Sheets credentials not found in environment variables.")
-    service = None
+def find_first_empty_row(service):
+    range_name = 'WH to CS OOS Comms!A:A'  # Ensure this matches your sheet name
+    result = service.spreadsheets().values().get(spreadsheetId=SPREADSHEET_ID, range=range_name).execute()
+    values = result.get('values', [])
+    return len(values) + 1
 
-# Function to find the first empty row in the Google Sheet
-def find_first_empty_row():
-    if service is None:
-        logging.error("Google Sheets service is not initialized.")
-        raise Exception("Google Sheets service is not initialized.")
-
-    try:
-        # Get the current values in column A
-        result = service.spreadsheets().values().get(
-            spreadsheetId=SPREADSHEET_ID,
-            range='WH to CS OOS Comms!A:A'
-        ).execute()
-        values = result.get('values', [])
-
-        # Find the first empty row
-        if not values:
-            return 1  # If no data, start at row 1
-        return len(values) + 1
-    except Exception as e:
-        logging.error(f"Error finding first empty row: {e}")
-        raise
-
-# Route for the form to input order data
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    success_message = None  # Initialize success message
-
     if request.method == 'POST':
         order_number = request.form['order_number']
         sku = request.form['sku']
 
-        # Ensure the Google Sheets service is available
-        if service is None:
-            logging.error("Google Sheets service is not available.")
-            return "An error occurred: Google Sheets service is not available."
+        # Authenticate and build the Google Sheets service
+        creds = service_account.Credentials.from_service_account_file(CREDENTIALS_FILE)
+        service = build('sheets', 'v4', credentials=creds)
 
-        # Get the current date in the desired format
-        current_date = datetime.now().strftime('%d/%m/%y')
+        # Find the first empty row and update it
+        first_empty_row = find_first_empty_row(service)
+        range_to_update = f'WH to CS OOS Comms!A{first_empty_row}:B{first_empty_row}'
 
-        # Prepare the data to be updated
-        values = [[current_date, order_number, sku]]  # Insert date, order number, and SKU
-        logging.debug(f"Updating Google Sheet with values: {values}")
+        values = [[order_number, sku]]
+        body = {'values': values}
+        service.spreadsheets().values().update(spreadsheetId=SPREADSHEET_ID, range=range_to_update,
+                                                valueInputOption='RAW', body=body).execute()
 
-        try:
-            first_empty_row = find_first_empty_row()
-            range_to_update = f'WH to CS OOS Comms!A{first_empty_row}:C{first_empty_row}'  # Updated to C for SKU
+        return 'Data updated successfully!'
 
-            # Log the range and body before execution
-            logging.debug(f"Range to update: {range_to_update}")
-            body = {'values': values}
-            logging.debug(f"Body to update: {body}")
+    return render_template('index.html')
 
-            # Call the Sheets API to update the spreadsheet
-            response = service.spreadsheets().values().update(
-                spreadsheetId=SPREADSHEET_ID,
-                range=range_to_update,
-                valueInputOption='RAW',
-                body=body
-            ).execute()
-
-            logging.info(f"Response from Google Sheets API: {response}")
-            success_message = "OOS successfully added to Google Sheet."  # Set success message
-        except Exception as e:
-            logging.error(f"Error updating spreadsheet: {e}")
-            return f'An error occurred: {e}'
-
-    return render_template('index.html', success_message=success_message)
-
-# Run the Flask app
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))  # Get port from environment variable
-    app.run(host='0.0.0.0', port=port, debug=True)  # Bind to all available IP addresses
+    app.run(debug=True)

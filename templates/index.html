@@ -10,13 +10,31 @@
             background-color: #ffffff; /* White background */
             color: #000000; /* Black text */
             font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
         }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
+        .container {
+            background-color: #f9f9f9; /* Light gray background for the form */
+            border-radius: 15px; /* Rounded corners */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+            padding: 40px; /* Padding inside the container */
+            max-width: 500px; /* Max width */
+            text-align: center; /* Center text */
         }
         .header img {
-            max-width: 200px; /* Adjust as needed */
+            max-width: 180px; /* Adjust logo size */
+            margin-bottom: 20px; /* Space below the logo */
+        }
+        h1 {
+            font-size: 24px; /* Larger heading */
+            margin-bottom: 30px; /* Space below the heading */
+        }
+        .form-group {
+            text-align: left; /* Align labels and inputs to the left */
         }
         .alert {
             margin-top: 20px;
@@ -24,19 +42,17 @@
         .btn-primary {
             background-color: #000000; /* Black button */
             border: none;
+            border-radius: 20px; /* Rounded button edges */
+            padding: 10px 20px; /* Button padding */
+            font-size: 16px; /* Button font size */
         }
         .btn-primary:hover {
             background-color: #444444; /* Darker shade on hover */
         }
-        @media (min-width: 768px) {
-            .container {
-                max-width: 600px; /* Max width for larger screens */
-            }
-        }
     </style>
 </head>
 <body>
-    <div class="container mt-5">
+    <div class="container">
         <div class="header">
             <img src="{{ url_for('static', filename='RW_Flame.jpg') }}" alt="RW Flame Logo">
             <h1>Update Google Sheets</h1>

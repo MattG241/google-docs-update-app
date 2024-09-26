@@ -5,10 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Google Sheet</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #ffffff; /* White background */
+            color: #000000; /* Black text */
+            font-family: Arial, sans-serif;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header img {
+            max-width: 200px; /* Adjust as needed */
+        }
+        .alert {
+            margin-top: 20px;
+        }
+        .btn-primary {
+            background-color: #000000; /* Black button */
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #444444; /* Darker shade on hover */
+        }
+        @media (min-width: 768px) {
+            .container {
+                max-width: 600px; /* Max width for larger screens */
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="text-center">Update Google Sheets</h1>
+        <div class="header">
+            <img src="{{ url_for('static', filename='RW_Flame.jpg') }}" alt="RW Flame Logo">
+            <h1>Update Google Sheets</h1>
+        </div>
+        
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
             {% for category, message in messages %}
@@ -16,6 +49,7 @@
             {% endfor %}
           {% endif %}
         {% endwith %}
+        
         <form method="POST">
             <div class="form-group">
                 <label for="order_number">Order Number:</label>
@@ -25,9 +59,10 @@
                 <label for="sku">SKU:</label>
                 <input type="text" class="form-control" id="sku" name="sku" required>
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-primary btn-block">Submit</button>
         </form>
     </div>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
